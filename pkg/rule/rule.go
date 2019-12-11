@@ -71,7 +71,7 @@ func (m *Manager) RuleGroups() []Group {
 	for s, r := range m.mgrs {
 		for _, group := range r.RuleGroups() {
 			res = append(res, Group{
-				Group:                   group,
+				Group: group,
 				PartialResponseStrategy: s,
 				originalFile:            m.ruleFiles[group.File()],
 			})
@@ -169,12 +169,11 @@ func (m *Manager) Update(evalInterval time.Duration, files []string) error {
 
 		// NOTE: This is very ugly, but we need to reparse it into tmp dir without the field to have to reuse
 		// rules.Manager. The problem is that it uses yaml.UnmarshalStrict for some reasons.
-		groupsByStrategy := map[storepb.PartialResponseStrategy]*rulefmt.RuleGroups{}
+		groupsByStrategy := map[storepb.PartialResponseStrategy]*rulefmt.RuleGroups{
+			storepb.PartialResponseStrategy_WARN:  &rulefmt.RuleGroups{},
+			storepb.PartialResponseStrategy_ABORT: &rulefmt.RuleGroups{},
+		}
 		for _, rg := range rg.Groups {
-			if _, ok := groupsByStrategy[*rg.PartialResponseStrategy]; !ok {
-				groupsByStrategy[*rg.PartialResponseStrategy] = &rulefmt.RuleGroups{}
-			}
-
 			groupsByStrategy[*rg.PartialResponseStrategy].Groups = append(
 				groupsByStrategy[*rg.PartialResponseStrategy].Groups,
 				rg.RuleGroup,
